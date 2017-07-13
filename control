@@ -1,0 +1,10 @@
+Package: com.ps.emojilayout
+Name: EmojiLayout
+Depends: mobilesubstrate, preferenceloader, firmware (>= 6.0), firmware (<< 8.3)
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Layout the emoji keyboard.
+Maintainer: PoomSmart
+Author: PoomSmart
+Section: Tweaks
+Depiction: https://poomsmart.github.io/repo/emojilayout/index.html
