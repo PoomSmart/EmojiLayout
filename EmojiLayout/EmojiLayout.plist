@@ -23,7 +23,8 @@
       		<key>footerAlignment</key>
         	<integer>1</integer>
         	<key>footerText</key>
-        	<string>iPhone default: (row: 5, col: 8)
+        	<string>iPhone (3.5/4-inches) default: (row: 5, col: 8)
+iPhone 6 Plus default: (row: 5, col: 9)
 iPad default: (row: 3, col: 12)
 
 © 2017 Thatchapon Unprasert

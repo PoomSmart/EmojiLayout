@@ -5,11 +5,14 @@
 #import "../PSPrefs.x"
 #import <CoreText/CoreText.h>
 #import <UIKit/UIScreen+Private.h>
+#import <UIKit/UIPeripheralHost.h>
 
 //CGFloat emoSize;
 NSInteger row;
 NSInteger col;
 CGFloat margin = 8.5;
+CGFloat (*UIKBKeyboardDefaultPortraitWidth)();
+CGFloat (*UIKBKeyboardDefaultLandscapeWidth)();
 
 static UIKeyboardEmojiScrollView *emojiScrollView() {
     return (UIKeyboardEmojiScrollView *)[%c(UIKeyboardEmojiInputController) activeInputView];
@@ -44,12 +47,22 @@ static CGFloat keyboardHeight() {
     return height;
 }
 
+static CGFloat portraitKeyboardWidth() {
+    return UIKBKeyboardDefaultPortraitWidth();
+}
+
+static CGFloat landscapeKeyboardWidth() {
+    if (UIKBKeyboardDefaultLandscapeWidth)
+        return UIKBKeyboardDefaultLandscapeWidth();
+    return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
+}
+
 static CGFloat offset(BOOL portrait) {
     return isiOS7Up ? [%c(UIKeyboardEmojiGraphics) emojiPageControlYOffset: portrait] : 6.0;
 }
 
 static CGFloat paddingXForPortrait() {
-    CGFloat w = [UIKeyboardImpl defaultSizeForInterfaceOrientation:1].width;
+    CGFloat w = portraitKeyboardWidth();
     CGFloat padding = (w - (2 * margin) - (col * emojiSize(YES).width)) / (col - 1);
     return padding;
 }
@@ -75,15 +88,13 @@ static NSInteger bestRowForLandscape() {
     CGFloat paddingX = paddingXForPortrait();
     CGFloat u = h - offset(YES) - dotHeight() - margin + paddingX;
     CGFloat d = emojiSize(NO).height + paddingX;
-    #if CGFLOAT_IS_DOUBLE
+#if CGFLOAT_IS_DOUBLE
     NSInteger bestRow = round(u/d);
-    #else
+#else
     NSInteger bestRow = roundf(u/d);
-    #endif
-    if (isiOS8Up) {
-        if ([[UIScreen mainScreen] _interfaceOrientedBounds].size.width > 568.0)
-            bestRow++;
-    }
+#endif
+    if (isiOS8Up && [[UIScreen mainScreen] _interfaceOrientedBounds].size.width > 568.0)
+        bestRow++;
     return bestRow;
 }
 
@@ -99,22 +110,22 @@ static CGFloat paddingYForLandscape() {
 static NSInteger bestColForLandscape() {
     if (IS_IPAD)
         return 16;
-    CGFloat w = [UIKeyboardImpl _defaultSizeForInterfaceOrientation:3].width;
+    CGFloat w = landscapeKeyboardWidth();
     CGFloat px = paddingXForPortrait();
     CGFloat u = (w - (2 * margin) + px);
     CGFloat d = emojiSize(NO).width + px;
-        #if CGFLOAT_IS_DOUBLE
+#if CGFLOAT_IS_DOUBLE
     NSInteger bestCol = round(u/d);
-        #else
+#else
     NSInteger bestCol = roundf(u/d);
-        #endif
+#endif
     return bestCol;
 }
 
 static CGFloat paddingXForLandscape() {
-    CGFloat w = [UIKeyboardImpl _defaultSizeForInterfaceOrientation:3].width;
+    CGFloat w = landscapeKeyboardWidth();
     NSInteger bestCol = bestColForLandscape();
-    CGFloat padding = (w - (2 * margin) - (bestCol * emojiSize(NO).width))/(bestCol - 1);
+    CGFloat padding = (w - (2 * margin) - (bestCol * emojiSize(NO).width)) / (bestCol - 1);
     return padding;
 }
 
@@ -358,6 +369,10 @@ HaveCallback() {
     if (isTarget(TargetTypeGUINoExtension)) {
         HaveObserver();
         callback();
+        MSImageRef ref = MSGetImageByName(realPath2(@"/System/Library/Frameworks/UIKit.framework/UIKit"));
+        UIKBKeyboardDefaultPortraitWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultPortraitWidth");
+        if (!isiOS8Up)
+            UIKBKeyboardDefaultLandscapeWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultLandscapeWidth");
         if (isiOS7Up) {
             %init(iOS7Up);
         } else {
