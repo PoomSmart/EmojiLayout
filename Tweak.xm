@@ -1,8 +1,7 @@
-#define LEGACY
 #define CHECK_TARGET
 #import "../PS.h"
-#import "../EmojiLibrary/NSString-Internal.h"
 #import "../EmojiLibrary/Header.h"
+#import "../EmojiLibrary/PSEmojiUtilities.h"
 #import "../PSPrefs.x"
 #import <CoreText/CoreText.h>
 #import <UIKit/UIScreen+Private.h>
@@ -13,7 +12,7 @@ NSInteger col;
 CGFloat margin = 8.5;
 
 static UIKeyboardEmojiScrollView *emojiScrollView() {
-    return [%c(UIKeyboardEmojiInputController) activeInputView];
+    return (UIKeyboardEmojiScrollView *)[%c(UIKeyboardEmojiInputController) activeInputView];
 }
 
 static CGSize emojiSize(BOOL portrait) {
@@ -100,7 +99,7 @@ static CGFloat paddingYForLandscape() {
 static NSInteger bestColForLandscape() {
     if (IS_IPAD)
         return 16;
-    CGFloat w = [UIKeyboardImpl defaultSizeForInterfaceOrientation:3].width;
+    CGFloat w = [UIKeyboardImpl _defaultSizeForInterfaceOrientation:3].width;
     CGFloat px = paddingXForPortrait();
     CGFloat u = (w - (2 * margin) + px);
     CGFloat d = emojiSize(NO).width + px;
@@ -113,7 +112,7 @@ static NSInteger bestColForLandscape() {
 }
 
 static CGFloat paddingXForLandscape() {
-    CGFloat w = [UIKeyboardImpl defaultSizeForInterfaceOrientation:3].width;
+    CGFloat w = [UIKeyboardImpl _defaultSizeForInterfaceOrientation:3].width;
     NSInteger bestCol = bestColForLandscape();
     CGFloat padding = (w - (2 * margin) - (bestCol * emojiSize(NO).width))/(bestCol - 1);
     return padding;
@@ -214,10 +213,8 @@ BOOL pageZero = NO;
     NSString *emojiString = emoji.emojiString;
     if (!emojiString || [emojiString isEqualToString:@""])
         return;
-    if (isiOS7Up) {
-        if ([emoji hasDingbat])
-            emojiString = [NSString stringWithFormat:@"%@%@", emojiString, unctostr(0xFE0F)];
-    }
+    if (isiOS7Up && [emoji hasDingbat])
+        emojiString = [NSString stringWithFormat:@"%@%@", emojiString, FE0F];
     UIKeyboardImpl *kbImpl = [UIKeyboardImpl sharedInstance];
     if ([kbImpl acceptInputString:emojiString]) {
         if (isiOS7Up) {
@@ -359,7 +356,7 @@ HaveCallback() {
 
 %ctor {
     if (isTarget(TargetTypeGUINoExtension)) {
-        HaveObserver()
+        HaveObserver();
         callback();
         if (isiOS7Up) {
             %init(iOS7Up);

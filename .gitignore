@@ -1,6 +1,3 @@
-.
-theos
-_
 .theos
 obj
-emoji
+packages/*
