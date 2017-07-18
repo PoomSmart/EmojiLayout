@@ -48,7 +48,9 @@ static CGFloat keyboardHeight() {
 }
 
 static CGFloat portraitKeyboardWidth() {
-    return UIKBKeyboardDefaultPortraitWidth();
+    if (UIKBKeyboardDefaultPortraitWidth)
+        return UIKBKeyboardDefaultPortraitWidth();
+    return [UIKeyboardImpl defaultSizeForInterfaceOrientation:1].width;
 }
 
 static CGFloat landscapeKeyboardWidth() {
