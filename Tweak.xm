@@ -15,7 +15,7 @@ CGFloat (*UIKBKeyboardDefaultPortraitWidth)();
 CGFloat (*UIKBKeyboardDefaultLandscapeWidth)();
 
 static UIKeyboardEmojiScrollView *emojiScrollView() {
-    return (UIKeyboardEmojiScrollView *)[%c(UIKeyboardEmojiInputController) activeInputView];
+    return isiOS6Up ? (UIKeyboardEmojiScrollView *)[%c(UIKeyboardEmojiInputController) activeInputView] : (UIKeyboardEmojiScrollView *)[[%c(UIKeyboardLayoutEmoji) emojiLayout] valueForKey:@"_emojiView"];;
 }
 
 static CGSize emojiSize(BOOL portrait) {
@@ -56,6 +56,8 @@ static CGFloat portraitKeyboardWidth() {
 static CGFloat landscapeKeyboardWidth() {
     if (UIKBKeyboardDefaultLandscapeWidth)
         return UIKBKeyboardDefaultLandscapeWidth();
+    if (!isiOS6Up)
+        return UIScreen.mainScreen.bounds.size.height;
     return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
 }
 
@@ -78,8 +80,10 @@ static CGFloat paddingYForPortrait() {
 }
 
 static BOOL isPortrait() {
+    if (!isiOS6Up)
+        return ![NSClassFromString(@"UIKeyboardLayoutEmoji") isLandscape];
     UIKeyboardImpl *impl = [UIKeyboardImpl activeInstance];
-    NSInteger orientation = [impl interfaceOrientation];
+    NSInteger orientation = MSHookIvar<NSInteger>(impl, "m_orientation");
     return orientation == 1 || orientation == 2;
 }
 
@@ -170,28 +174,25 @@ BOOL pageZero = NO;
 
 %hook UIKeyboardEmojiPage
 
-- (void)setEmoji: (NSArray *)emoji {
+- (void)setEmoji: (NSArray <UIKeyboardEmoji *> *)emoji {
     BOOL Portrait = isPortrait();
     BOOL iPadLandscape = IS_IPAD && !Portrait;
-    if (emoji.count > 0 && !pageZero && (Portrait || iPadLandscape)) {
+    if (emoji.count && !pageZero && (Portrait || iPadLandscape)) {
         NSInteger Row = row;
         NSInteger Col = col;
         if (iPadLandscape) {
             Row = bestRowForLandscape();
             Col = bestColForLandscape();
         }
-        NSMutableArray *reorderedEmoji = [NSMutableArray array];
+        NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray array];
         for (NSInteger _row = 0; _row < Row; _row++) {
             for (NSInteger count = 0; count < Col; count++) {
                 NSInteger emojiIndex = (count * Row) + _row;
                 if (emojiIndex < emoji.count) {
-                    UIKeyboardEmoji *emo = emoji[emojiIndex];
+                    UIKeyboardEmoji *emo = [emoji objectAtIndex:emojiIndex];
                     [reorderedEmoji addObject:emo];
-                } else {
-                    UIKeyboardEmoji *fake = [NSClassFromString(@"UIKeyboardEmoji") respondsToSelector:@selector(emojiWithString:hasDingbat:)] ? [NSClassFromString(@"UIKeyboardEmoji") emojiWithString:@"" hasDingbat:NO]
-                                            : [NSClassFromString(@"UIKeyboardEmoji") emojiWithString:@""];
-                    [reorderedEmoji addObject:fake];
-                }
+                } else
+                    [reorderedEmoji addObject:[SoftPSEmojiUtilities emojiWithString:@""]];
             }
         }
         if (reorderedEmoji.count > 0) {
@@ -200,6 +201,11 @@ BOOL pageZero = NO;
         }
     }
     %orig;
+}
+
+- (UIKeyboardEmojiView *)closestForPoint:(CGPoint)point {
+    UIKeyboardEmojiView *orig = %orig;
+    return orig && orig.emoji.emojiString.length == 0 ? nil : orig;
 }
 
 %end
@@ -219,6 +225,8 @@ BOOL pageZero = NO;
 }
 
 %end
+
+%group iOS6Up
 
 %hook UIKeyboardEmojiInputController
 
@@ -292,13 +300,6 @@ BOOL pageZero = NO;
 
 %end
 
-%hook UIKeyboardEmojiPage
-
-- (UIKeyboardEmojiView *)closestForPoint: (CGPoint)point {
-    UIKeyboardEmojiView *orig = %orig;
-    return orig && orig.emoji.emojiString.length == 0 ? nil : orig;
-}
-
 %end
 
 %group iOS7Up
@@ -324,7 +325,7 @@ BOOL pageZero = NO;
 
 %end
 
-%group iOS6
+%group iOS56
 
 %hook EmojiPageControl
 
@@ -371,14 +372,18 @@ HaveCallback() {
     if (isTarget(TargetTypeGUINoExtension)) {
         HaveObserver();
         callback();
+        dlopen("/usr/lib/libEmojiLibrary.dylib", RTLD_LAZY);
         MSImageRef ref = MSGetImageByName(realPath2(@"/System/Library/Frameworks/UIKit.framework/UIKit"));
         UIKBKeyboardDefaultPortraitWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultPortraitWidth");
         if (!isiOS8Up)
             UIKBKeyboardDefaultLandscapeWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultLandscapeWidth");
+        if (isiOS6Up) {
+            %init(iOS6Up);
+        }
         if (isiOS7Up) {
             %init(iOS7Up);
         } else {
-            %init(iOS6);
+            %init(iOS56);
         }
         %init;
     }

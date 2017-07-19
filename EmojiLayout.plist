@@ -1,6 +1,6 @@
 {
-	"CoreFoundationVersion" = (
-		"793.0",
+	CoreFoundationVersion = (
+		"690.10",
 		"1143.0"
 	);
 	Filter = {
