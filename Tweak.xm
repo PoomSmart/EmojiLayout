@@ -48,16 +48,18 @@ static CGFloat keyboardHeight() {
 }
 
 static CGFloat portraitKeyboardWidth() {
-    if (UIKBKeyboardDefaultPortraitWidth)
+    if (!isiOS8Up && UIKBKeyboardDefaultPortraitWidth)
         return UIKBKeyboardDefaultPortraitWidth();
-    return [UIKeyboardImpl defaultSizeForInterfaceOrientation:1].width;
+    return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
 }
 
 static CGFloat landscapeKeyboardWidth() {
     if (UIKBKeyboardDefaultLandscapeWidth)
         return UIKBKeyboardDefaultLandscapeWidth();
+ #if !__LP64__
     if (!isiOS6Up)
         return UIScreen.mainScreen.bounds.size.height;
+ #endif
     return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
 }
 
@@ -80,8 +82,10 @@ static CGFloat paddingYForPortrait() {
 }
 
 static BOOL isPortrait() {
+ #if !__LP64__
     if (!isiOS6Up)
         return ![NSClassFromString(@"UIKeyboardLayoutEmoji") isLandscape];
+ #endif
     UIKeyboardImpl *impl = [UIKeyboardImpl activeInstance];
     NSInteger orientation = MSHookIvar<NSInteger>(impl, "m_orientation");
     return orientation == 1 || orientation == 2;
@@ -94,11 +98,11 @@ static NSInteger bestRowForLandscape() {
     CGFloat paddingX = paddingXForPortrait();
     CGFloat u = h - offset(YES) - dotHeight() - margin + paddingX;
     CGFloat d = emojiSize(NO).height + paddingX;
-#if CGFLOAT_IS_DOUBLE
+ #if CGFLOAT_IS_DOUBLE
     NSInteger bestRow = round(u/d);
-#else
+ #else
     NSInteger bestRow = roundf(u/d);
-#endif
+ #endif
     if (isiOS8Up && [[UIScreen mainScreen] _interfaceOrientedBounds].size.width > 568.0)
         bestRow++;
     return bestRow;
@@ -110,7 +114,7 @@ static CGFloat paddingYForLandscape() {
     CGFloat padding = (h - offset(NO) - dotHeight() - margin - (bestRow * emojiSize(NO).height)) / (bestRow - 1);
     if (IS_IPAD)
         padding -= 3.0;
-    return padding /*- margin*/;
+    return padding;
 }
 
 static NSInteger bestColForLandscape() {
@@ -120,11 +124,11 @@ static NSInteger bestColForLandscape() {
     CGFloat px = paddingXForPortrait();
     CGFloat u = (w - (2 * margin) + px);
     CGFloat d = emojiSize(NO).width + px;
-#if CGFLOAT_IS_DOUBLE
+ #if CGFLOAT_IS_DOUBLE
     NSInteger bestCol = round(u/d);
-#else
+ #else
     NSInteger bestCol = roundf(u/d);
-#endif
+ #endif
     return bestCol;
 }
 
@@ -188,14 +192,10 @@ BOOL pageZero = NO;
         for (NSInteger _row = 0; _row < Row; _row++) {
             for (NSInteger count = 0; count < Col; count++) {
                 NSInteger emojiIndex = (count * Row) + _row;
-                if (emojiIndex < emoji.count) {
-                    UIKeyboardEmoji *emo = [emoji objectAtIndex:emojiIndex];
-                    [reorderedEmoji addObject:emo];
-                } else
-                    [reorderedEmoji addObject:[SoftPSEmojiUtilities emojiWithString:@""]];
+                [reorderedEmoji addObject:emojiIndex < emoji.count ? [emoji objectAtIndex:emojiIndex] : [SoftPSEmojiUtilities emojiWithString:@""]];
             }
         }
-        if (reorderedEmoji.count > 0) {
+        if (reorderedEmoji.count) {
             %orig(reorderedEmoji);
             return;
         }
@@ -276,7 +276,7 @@ BOOL pageZero = NO;
     NSUInteger recentsCount = recents.count;
     NSUInteger maxCount = [%c(UIKeyboardEmojiGraphics) rowCount:YES] * [%c(UIKeyboardEmojiGraphics) colCount: YES];
     NSUInteger indexOfEmojiToBeRemoved = [recents indexOfObject:emoji];
-    if (recentsCount > 0 && indexOfEmojiToBeRemoved != NSNotFound)
+    if (recentsCount && indexOfEmojiToBeRemoved != NSNotFound)
         [recents removeObjectAtIndex:indexOfEmojiToBeRemoved];
     else if (recentsCount > maxCount) {
         UIKeyboardEmoji *lastRecentEmoji = [recents lastObject];
@@ -285,7 +285,7 @@ BOOL pageZero = NO;
             [recents removeLastObject];
     }
     NSUInteger idx = 0;
-    if (recentsCount > 0) {
+    if (recentsCount) {
         do {
             UIKeyboardEmoji *emojiAtIndex = recents[idx];
             double scoreOfEmojiAtIndex = [self scoreForEmoji:emojiAtIndex];
@@ -325,6 +325,8 @@ BOOL pageZero = NO;
 
 %end
 
+#if !__LP64__
+
 %group iOS56
 
 %hook EmojiPageControl
@@ -348,6 +350,10 @@ BOOL draw = NO;
 
 %end
 
+%end
+
+%group iOS6
+
 %hookf(void, CTFontDrawGlyphs, CTFontRef font, const CGGlyph glyphs[], const CGPoint positions[], size_t count, CGContextRef context) {
     if (draw && glyphs[0] == 0)
         return;
@@ -355,6 +361,8 @@ BOOL draw = NO;
 }
 
 %end
+
+#endif
 
 static const NSString *tweakIdentifier = @"com.PS.EmojiLayout";
 static const NSString *colKey = @"columns";
@@ -382,9 +390,15 @@ HaveCallback() {
         }
         if (isiOS7Up) {
             %init(iOS7Up);
-        } else {
-            %init(iOS56);
         }
+        #if !__LP64__
+        else {
+            %init(iOS56);
+            if (isiOS6) {
+                %init(iOS6);
+            }
+        }
+        #endif
         %init;
     }
 }
