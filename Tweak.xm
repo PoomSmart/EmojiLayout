@@ -48,7 +48,7 @@ static CGFloat keyboardHeight() {
 }
 
 static CGFloat portraitKeyboardWidth() {
-    if (isiOS7)
+    if (!isiOS8Up)
         return [UIKeyboardImpl defaultSizeForInterfaceOrientation:1].width;
     if (UIKBKeyboardDefaultPortraitWidth)
         return UIKBKeyboardDefaultPortraitWidth();
