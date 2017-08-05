@@ -1,9 +1,12 @@
 #import "../EmojiLibrary/Header.h"
 
-#define ADDITIONAL_IPAD 14.0
-#define ADDITIONAL 5.0
 #define DEFAULT_OFFSET 6.0
 #define MARGIN 8.5
+#define MARGIN_IPAD 10.0
+#define MARGIN_IPAD_PORTRAIT 12.0
+#define MARGIN_BOTTOM 6.0
+#define MARGIN_BOTTOM_IPAD 10.0
+#define MARGIN_BOTTOM_IPAD_PORTRAIT 14.0
 #define DOT_HEIGHT 14.0
 
 #define BEST_ROW_IPAD 5
@@ -19,15 +22,17 @@
 @interface PSEmojiLayout (Layout)
 + (BOOL)isPortrait;
 + (UIKeyboardEmojiScrollView *)emojiScrollView;
-+ (CGSize)emojiScrollViewSize;
 + (CGSize)emojiSize:(BOOL)portrait;
 + (CGPoint)margin:(BOOL)portrait;
-+ (CGPoint)padding:(BOOL)portrait col:(NSInteger)col row:(NSInteger)row;
-+ (CGFloat)paddingX:(BOOL)portrait col:(NSInteger)col row:(NSInteger)row;
-+ (CGFloat)paddingY:(BOOL)portrait col:(NSInteger)col row:(NSInteger)col;
++ (CGPoint)padding:(BOOL)portrait;
++ (CGFloat)paddingX:(BOOL)portrait;
++ (CGFloat)paddingY:(BOOL)portrait;
 + (CGFloat)offset:(BOOL)portrait;
++ (CGFloat)marginBottom:(BOOL)portrait;
 + (CGFloat)dotHeight;
 + (CGFloat)keyboardWidth:(BOOL)portrait;
++ (NSInteger)rowCount:(BOOL)portrait;
++ (NSInteger)colCount:(BOOL)portrait;
 + (NSInteger)bestRowForLandscape;
 + (NSInteger)bestColForLandscape;
 @end

@@ -19,7 +19,7 @@ NSInteger col;
 }
 
 + (CGPoint)padding:(BOOL)portrait {
-    return [PSEmojiLayout padding:portrait col:col row:row];
+    return [PSEmojiLayout padding:portrait];
 }
 
 + (CGPoint)margin:(BOOL)portrait {
@@ -33,15 +33,10 @@ BOOL pageZero = NO;
 %hook UIKeyboardEmojiPage
 
 - (void)setEmoji: (NSArray <UIKeyboardEmoji *> *)emoji {
-    BOOL Portrait = [PSEmojiLayout isPortrait];
-    BOOL iPadLandscape = IS_IPAD && !Portrait;
-    if (emoji.count && !pageZero && (Portrait || iPadLandscape)) {
-        NSInteger Row = row;
-        NSInteger Col = col;
-        if (iPadLandscape) {
-            Row = [PSEmojiLayout bestRowForLandscape];
-            Col = [PSEmojiLayout bestColForLandscape];
-        }
+    BOOL portrait = NO;
+    if (!pageZero && emoji.count && ((portrait = [PSEmojiLayout isPortrait]) || IS_IPAD)) {
+        NSInteger Row = [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
+        NSInteger Col = [NSClassFromString(@"UIKeyboardEmojiGraphics") colCount:portrait];
         NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray array];
         for (NSInteger _row = 0; _row < Row; _row++) {
             for (NSInteger count = 0; count < Col; count++) {
@@ -59,7 +54,7 @@ BOOL pageZero = NO;
 
 - (UIKeyboardEmojiView *)closestForPoint:(CGPoint)point {
     UIKeyboardEmojiView *orig = %orig;
-    return orig && orig.emoji.emojiString.length == 0 ? nil : orig;
+    return orig.emoji.emojiString.length == 0 ? nil : orig;
 }
 
 %end
@@ -157,14 +152,6 @@ BOOL pageZero = NO;
 %end
 
 %group iOS7Up
-
-/*%hook UIKeyboardEmojiGraphics
-
- + (CGFloat)emojiPageControlYOffset: (BOOL)portrait {
-    return [PSEmojiLayout dotHeight];
-   }
-
-   %end*/
 
 %hook _UIEmojiPageControl
 

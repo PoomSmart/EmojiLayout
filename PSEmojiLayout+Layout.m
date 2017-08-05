@@ -19,8 +19,12 @@
     return isiOS6Up ? (UIKeyboardEmojiScrollView *)[NSClassFromString(@"UIKeyboardEmojiInputController") activeInputView] : (UIKeyboardEmojiScrollView *)[[NSClassFromString(@"UIKeyboardLayoutEmoji") emojiLayout] valueForKey:@"_emojiView"];
 }
 
-+ (CGSize)emojiScrollViewSize {
-    return [self emojiScrollView].frame.size;
++ (NSInteger)rowCount:(BOOL)portrait {
+    return [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
+}
+
++ (NSInteger)colCount:(BOOL)portrait {
+    return [NSClassFromString(@"UIKeyboardEmojiGraphics") colCount:portrait];
 }
 
 + (CGSize)emojiSize:(BOOL)portrait {
@@ -28,7 +32,11 @@
 }
 
 + (CGPoint)margin:(BOOL)portrait {
-    return CGPointMake(MARGIN, [self dotHeight] + (IS_IPAD ? ADDITIONAL_IPAD : ADDITIONAL));
+    return CGPointMake(IS_IPAD ? (portrait ? MARGIN_IPAD_PORTRAIT : MARGIN_IPAD) : MARGIN, [self dotHeight]);
+}
+
++ (CGFloat)marginBottom:(BOOL)portrait {
+    return IS_IPAD ? (portrait ? MARGIN_BOTTOM_IPAD_PORTRAIT : MARGIN_BOTTOM_IPAD) : MARGIN_BOTTOM;
 }
 
 + (CGFloat)offset:(BOOL)portrait {
@@ -45,8 +53,21 @@
     return height == 0.0 ? DOT_HEIGHT : height;
 }
 
++ (CGFloat)_screenWidth {
+    CGSize screenSize = UIScreen.mainScreen.bounds.size;
+    return MIN(screenSize.width, screenSize.height);
+}
+
 + (CGFloat)_scrollViewHeight:(BOOL)portrait {
-    return [self scrollViewHeight:portrait ? @"" : @"Landscape"];
+    NSString *type = portrait ? @"" : @"Landscape";
+    if (!IS_IPAD) {
+        CGFloat screenWidth = [self _screenWidth];
+        if (screenWidth >= 414.0)
+            type = [type stringByAppendingString:@"Truffle"];
+        else if (screenWidth >= 375.0)
+            type = [type stringByAppendingString:@"Choco"];
+    }
+    return [self scrollViewHeight:type];
 }
 
 + (CGFloat)keyboardWidth:(BOOL)portrait {
@@ -71,25 +92,22 @@
     return BEST_COL;
 }
 
-+ (CGFloat)paddingX:(BOOL)portrait col:(NSInteger)col row:(NSInteger)row {
++ (CGFloat)paddingX:(BOOL)portrait {
     CGFloat w = [self keyboardWidth:portrait];
-    NSInteger _col = portrait ? col : [self bestColForLandscape];
-    CGFloat padding = (w - (2 * [self margin:portrait].x) - (_col * [self emojiSize:portrait].width)) / (_col - 1);
+    NSInteger col = [self colCount:portrait];
+    CGFloat padding = (w - (2 * [self margin:portrait].x) - (col * [self emojiSize:portrait].width)) / (col - 1);
     return padding;
 }
 
-+ (CGFloat)paddingY:(BOOL)portrait col:(NSInteger)col row:(NSInteger)row {
++ (CGFloat)paddingY:(BOOL)portrait {
     CGFloat h = [self _scrollViewHeight:portrait];
-    NSInteger _row = portrait ? row : [self bestRowForLandscape];
-    CGFloat padding = (h - [self offset:portrait] - [self margin:portrait].y - (_row * [self emojiSize:portrait].height)) / (_row - 1);
-    if (IS_IPAD)
-        padding *= 0.9;
+    NSInteger row = [self rowCount:portrait];
+    CGFloat padding = (h - [self margin:portrait].y - [self offset:portrait] - [self marginBottom:portrait] - (row * [self emojiSize:portrait].height)) / (row - 1);
     return padding;
 }
 
-+ (CGPoint)padding:(BOOL)portrait col:(NSInteger)col row:(NSInteger)row {
-    CGPoint point = CGPointMake([self paddingX:portrait col:col row:row], [self paddingY:portrait col:col row:row]);
-    return point;
++ (CGPoint)padding:(BOOL)portrait {
+    return CGPointMake([self paddingX:portrait], [self paddingY:portrait]);
 }
 
 @end
