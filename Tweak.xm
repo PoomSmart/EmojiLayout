@@ -1,177 +1,29 @@
 #define CHECK_TARGET
 #import "../PS.h"
-#import "../EmojiLibrary/Header.h"
 #import "../EmojiLibrary/PSEmojiUtilities.h"
 #import "../PSPrefs.x"
+#import "PSEmojiLayout.h"
 #import <CoreText/CoreText.h>
-#import <UIKit/UIScreen+Private.h>
-#import <UIKit/UIPeripheralHost.h>
 
-//CGFloat emoSize;
 NSInteger row;
 NSInteger col;
-CGFloat margin = 8.5;
-CGFloat (*UIKBKeyboardDefaultPortraitWidth)();
-CGFloat (*UIKBKeyboardDefaultLandscapeWidth)();
-
-static UIKeyboardEmojiScrollView *emojiScrollView() {
-    return isiOS6Up ? (UIKeyboardEmojiScrollView *)[%c(UIKeyboardEmojiInputController) activeInputView] : (UIKeyboardEmojiScrollView *)[[%c(UIKeyboardLayoutEmoji) emojiLayout] valueForKey:@"_emojiView"];;
-}
-
-static CGSize emojiSize(BOOL portrait) {
-    return [%c(UIKeyboardEmojiGraphics) emojiSize:portrait];
-}
-
-static CGSize emojiScrollViewSize() {
-    UIKeyboardEmojiScrollView *scrollView = emojiScrollView();
-    return scrollView ? scrollView.frame.size : CGSizeZero;
-}
-
-static CGFloat dotHeight() {
-    CGFloat height = 0.0;
-    UIKeyboardEmojiScrollView *scrollView = emojiScrollView();
-    if (scrollView) {
-        _UIEmojiPageControl *pageControl = MSHookIvar<_UIEmojiPageControl *>(scrollView, "_pageControl");
-        height = pageControl ? pageControl.frame.size.height : [pageControl _pageIndicatorImage].size.height;
-    }
-    return height == 0.0 ? 14.0 : height;
-}
-
-static CGFloat keyboardHeight() {
-    CGFloat height = emojiScrollViewSize().height;
-    if (height == 0.0) {
-        UIKeyboard *keyboard = [UIKeyboard activeKeyboard];
-        if (keyboard)
-            height = keyboard.frame.size.height - 30.0;
-    }
-    return height;
-}
-
-static CGFloat portraitKeyboardWidth() {
-    if (!isiOS8Up)
-        return [UIKeyboardImpl defaultSizeForInterfaceOrientation:1].width;
-    if (UIKBKeyboardDefaultPortraitWidth)
-        return UIKBKeyboardDefaultPortraitWidth();
-    return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
-}
-
-static CGFloat landscapeKeyboardWidth() {
-    if (UIKBKeyboardDefaultLandscapeWidth)
-        return UIKBKeyboardDefaultLandscapeWidth();
- #if !__LP64__
-    if (!isiOS6Up)
-        return UIScreen.mainScreen.bounds.size.height;
- #endif
-    return [(UIPeripheralHost *)[%c(UIPeripheralHost) sharedInstance] transformedContainerView].bounds.size.width;
-}
-
-static CGFloat offset(BOOL portrait) {
-    return isiOS7Up ? [%c(UIKeyboardEmojiGraphics) emojiPageControlYOffset: portrait] : 6.0;
-}
-
-static CGFloat paddingXForPortrait() {
-    CGFloat w = portraitKeyboardWidth();
-    CGFloat padding = (w - (2 * margin) - (col * emojiSize(YES).width)) / (col - 1);
-    return padding;
-}
-
-static CGFloat paddingYForPortrait() {
-    CGFloat h = keyboardHeight();
-    CGFloat padding = (h - offset(YES) - dotHeight() - (2 * margin) - (row * emojiSize(YES).height)) / (row - 1);
-    if (IS_IPAD)
-        padding -= 3.0;
-    return padding;
-}
-
-static BOOL isPortrait() {
- #if !__LP64__
-    if (!isiOS6Up)
-        return ![NSClassFromString(@"UIKeyboardLayoutEmoji") isLandscape];
- #endif
-    UIKeyboardImpl *impl = [UIKeyboardImpl activeInstance];
-    NSInteger orientation = MSHookIvar<NSInteger>(impl, "m_orientation");
-    return orientation == 1 || orientation == 2;
-}
-
-static NSInteger bestRowForLandscape() {
-    if (IS_IPAD)
-        return 5;
-    CGFloat h = keyboardHeight();
-    CGFloat paddingX = paddingXForPortrait();
-    CGFloat u = h - offset(YES) - dotHeight() - margin + paddingX;
-    CGFloat d = emojiSize(NO).height + paddingX;
- #if CGFLOAT_IS_DOUBLE
-    NSInteger bestRow = round(u/d);
- #else
-    NSInteger bestRow = roundf(u/d);
- #endif
-    if (isiOS8Up && [[UIScreen mainScreen] _interfaceOrientedBounds].size.width > 568.0)
-        bestRow++;
-    return bestRow;
-}
-
-static CGFloat paddingYForLandscape() {
-    CGFloat h = keyboardHeight();
-    NSInteger bestRow = bestRowForLandscape();
-    CGFloat padding = (h - offset(NO) - dotHeight() - margin - (bestRow * emojiSize(NO).height)) / (bestRow - 1);
-    if (IS_IPAD)
-        padding -= 3.0;
-    return padding;
-}
-
-static NSInteger bestColForLandscape() {
-    if (IS_IPAD)
-        return 16;
-    CGFloat w = landscapeKeyboardWidth();
-    CGFloat px = paddingXForPortrait();
-    CGFloat u = (w - (2 * margin) + px);
-    CGFloat d = emojiSize(NO).width + px;
- #if CGFLOAT_IS_DOUBLE
-    NSInteger bestCol = round(u/d);
- #else
-    NSInteger bestCol = roundf(u/d);
- #endif
-    return bestCol;
-}
-
-static CGFloat paddingXForLandscape() {
-    CGFloat w = landscapeKeyboardWidth();
-    NSInteger bestCol = bestColForLandscape();
-    CGFloat padding = (w - (2 * margin) - (bestCol * emojiSize(NO).width)) / (bestCol - 1);
-    return padding;
-}
-
-static CGPoint padding(BOOL portrait) {
-    CGPoint point;
-    if (portrait)
-        point = CGPointMake(paddingXForPortrait(), paddingYForPortrait());
-    else
-        point = CGPointMake(paddingXForLandscape(), paddingYForLandscape());
-    if (portrait && !IS_IPAD)
-        point.y += 2.0;
-    return point;
-}
 
 %hook UIKeyboardEmojiGraphics
 
-/*+ (CGSize)emojiSize: (BOOL)portrait {
-    return CGSizeMake(emoSize, emoSize);
-   }*/
-
 + (NSInteger)rowCount: (BOOL)portrait {
-    return portrait ? row : bestRowForLandscape();
+    return portrait ? row : [PSEmojiLayout bestRowForLandscape];
 }
 
 + (NSInteger)colCount:(BOOL)portrait {
-    return portrait ? col : bestColForLandscape();
+    return portrait ? col : [PSEmojiLayout bestColForLandscape];
 }
 
 + (CGPoint)padding:(BOOL)portrait {
-    return padding(portrait);
+    return [PSEmojiLayout padding:portrait col:col row:row];
 }
 
 + (CGPoint)margin:(BOOL)portrait {
-    return CGPointMake(margin, dotHeight() + offset(portrait));
+    return [PSEmojiLayout margin:portrait];
 }
 
 %end
@@ -181,14 +33,14 @@ BOOL pageZero = NO;
 %hook UIKeyboardEmojiPage
 
 - (void)setEmoji: (NSArray <UIKeyboardEmoji *> *)emoji {
-    BOOL Portrait = isPortrait();
+    BOOL Portrait = [PSEmojiLayout isPortrait];
     BOOL iPadLandscape = IS_IPAD && !Portrait;
     if (emoji.count && !pageZero && (Portrait || iPadLandscape)) {
         NSInteger Row = row;
         NSInteger Col = col;
         if (iPadLandscape) {
-            Row = bestRowForLandscape();
-            Col = bestColForLandscape();
+            Row = [PSEmojiLayout bestRowForLandscape];
+            Col = [PSEmojiLayout bestColForLandscape];
         }
         NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray array];
         for (NSInteger _row = 0; _row < Row; _row++) {
@@ -306,6 +158,14 @@ BOOL pageZero = NO;
 
 %group iOS7Up
 
+/*%hook UIKeyboardEmojiGraphics
+
+ + (CGFloat)emojiPageControlYOffset: (BOOL)portrait {
+    return [PSEmojiLayout dotHeight];
+   }
+
+   %end*/
+
 %hook _UIEmojiPageControl
 
 - (void)layoutSubviews {
@@ -369,38 +229,34 @@ BOOL draw = NO;
 static const NSString *tweakIdentifier = @"com.PS.EmojiLayout";
 static const NSString *colKey = @"columns";
 static const NSString *rowKey = @"rows";
-//static const NSString *emoSizeKey = @"size";
 
 HaveCallback() {
     GetPrefs()
     GetInt2(col, IS_IPAD ? 12 : 8)
     GetInt2(row, IS_IPAD ? 3 : 5)
-    //GetCGFloat2(emoSize, 16.0)
 }
 
 %ctor {
     if (isTarget(TargetTypeGUINoExtension)) {
         HaveObserver();
         callback();
+#if !TARGET_OS_SIMULATOR
         dlopen("/usr/lib/libEmojiLibrary.dylib", RTLD_LAZY);
-        MSImageRef ref = MSGetImageByName(realPath2(@"/System/Library/Frameworks/UIKit.framework/UIKit"));
-        UIKBKeyboardDefaultPortraitWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultPortraitWidth");
-        if (!isiOS8Up)
-            UIKBKeyboardDefaultLandscapeWidth = (CGFloat (*)())MSFindSymbol(ref, "_UIKBKeyboardDefaultLandscapeWidth");
+#endif
         if (isiOS6Up) {
             %init(iOS6Up);
         }
         if (isiOS7Up) {
             %init(iOS7Up);
         }
-        #if !__LP64__
+#if !__LP64__
         else {
             %init(iOS56);
             if (isiOS6) {
                 %init(iOS6);
             }
         }
-        #endif
+#endif
         %init;
     }
 }

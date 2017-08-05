@@ -1,7 +1,7 @@
 {
 	CoreFoundationVersion = (
 		"690.10",
-		"1143.0"
+		"1144.17"
 	);
 	Filter = {
 		Bundles = (
