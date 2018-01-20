@@ -38,9 +38,9 @@ BOOL pageZero = NO;
         NSInteger Row = [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
         NSInteger Col = [NSClassFromString(@"UIKeyboardEmojiGraphics") colCount:portrait];
         NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray array];
-        for (NSInteger _row = 0; _row < Row; _row++) {
+        for (NSInteger i = 0; i < Row; i++) {
             for (NSInteger count = 0; count < Col; count++) {
-                NSInteger emojiIndex = (count * Row) + _row;
+                NSInteger emojiIndex = (count * Row) + i;
                 [reorderedEmoji addObject:emojiIndex < emoji.count ? [emoji objectAtIndex:emojiIndex] : [SoftPSEmojiUtilities emojiWithString:@""]];
             }
         }
@@ -83,7 +83,7 @@ BOOL pageZero = NO;
     NSString *emojiString = emoji.emojiString;
     if (!emojiString || [emojiString isEqualToString:@""])
         return;
-    if (isiOS7Up && [emoji hasDingbat])
+    if ([emoji respondsToSelector:@selector(hasDingbat)] && [emoji hasDingbat])
         emojiString = [NSString stringWithFormat:@"%@%@", emojiString, FE0F];
     UIKeyboardImpl *kbImpl = [UIKeyboardImpl sharedInstance];
     if ([kbImpl acceptInputString:emojiString]) {
@@ -98,7 +98,7 @@ BOOL pageZero = NO;
     UIKeyboardEmojiDefaultsController *emojiDefaultsController = [%c(UIKeyboardEmojiDefaultsController) sharedController];
     if (usageHistory == nil) {
         id usageHistoryKey = emojiDefaultsController.usageHistoryKey;
-        if (usageHistoryKey != nil)
+        if (usageHistoryKey)
             usageHistory = (NSMutableDictionary *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)usageHistoryKey, kCFPropertyListMutableContainersAndLeaves);
         else
             usageHistory = [[NSMutableDictionary alloc] initWithCapacity:10];
@@ -106,7 +106,7 @@ BOOL pageZero = NO;
     #define recents MSHookIvar<NSMutableArray *>(self, "_recents")
     if (recents == nil) {
         id recentsKey = emojiDefaultsController.recentsKey;
-        if (recentsKey != nil)
+        if (recentsKey)
             recents = (NSMutableArray *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)recentsKey, kCFPropertyListMutableContainersAndLeaves);
         else
             recents = [[NSMutableArray alloc] initWithCapacity:10];

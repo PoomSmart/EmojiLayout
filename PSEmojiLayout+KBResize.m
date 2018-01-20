@@ -4,14 +4,12 @@
 @implementation PSEmojiLayout (KBResize)
 
 + (CGFloat)getHeight:(NSString *)name chocoL:(CGFloat)chocoL chocoP:(CGFloat)chocoP truffleL:(CGFloat)truffleL truffleP:(CGFloat)truffleP l:(CGFloat)l p:(CGFloat)p padL:(CGFloat)padL padP:(CGFloat)padP {
-    CGFloat height = 0.0f;
+    CGFloat height = 0.0;
     BOOL isLandscape = [name rangeOfString:@"Landscape"].location != NSNotFound || [name rangeOfString:@"Caymen"].location != NSNotFound || (!isiOS7Up && [name rangeOfString:@"3587139855"].location != NSNotFound);
-    BOOL choco = [name rangeOfString:@"Choco"].location != NSNotFound;
-    BOOL truffle = [name rangeOfString:@"Truffle"].location != NSNotFound;
-    if (choco) {
+    if ([name rangeOfString:@"Choco"].location != NSNotFound) {
         // iPhone 6
         height = isLandscape ? chocoL : chocoP;
-    } else if (truffle) {
+    } else if ([name rangeOfString:@"Truffle"].location != NSNotFound) {
         // iPhone 6+
         height = isLandscape ? truffleL : truffleP;
     } else {
