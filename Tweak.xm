@@ -10,7 +10,7 @@ NSInteger col;
 
 %hook UIKeyboardEmojiGraphics
 
-+ (NSInteger)rowCount: (BOOL)portrait {
++ (NSInteger)rowCount:(BOOL)portrait {
     return portrait ? row : [PSEmojiLayout bestRowForLandscape];
 }
 
@@ -32,7 +32,7 @@ BOOL pageZero = NO;
 
 %hook UIKeyboardEmojiPage
 
-- (void)setEmoji: (NSArray <UIKeyboardEmoji *> *)emoji {
+- (void)setEmoji:(NSArray <UIKeyboardEmoji *> *)emoji {
     BOOL portrait = NO;
     if (!pageZero && emoji.count && ((portrait = [PSEmojiLayout isPortrait]) || IS_IPAD)) {
         NSInteger Row = [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
@@ -79,7 +79,7 @@ BOOL pageZero = NO;
 
 %hook UIKeyboardEmojiInputController
 
-- (void)emojiUsed: (UIKeyboardEmoji *)emoji {
+- (void)emojiUsed:(UIKeyboardEmoji *)emoji {
     NSString *emojiString = emoji.emojiString;
     if (!emojiString || [emojiString isEqualToString:@""])
         return;
@@ -164,7 +164,7 @@ BOOL pageZero = NO;
 
 %hook UIKeyboardEmojiCategory
 
-+ (NSUInteger)hasVariantsForEmoji: (NSString *)emoji {
++ (NSUInteger)hasVariantsForEmoji:(NSString *)emoji {
     if (!emoji || [emoji isEqualToString:@""])
         return NO;
     return %orig;
@@ -191,7 +191,7 @@ BOOL draw = NO;
 
 %hook UIKeyboardEmojiPage
 
-- (void)drawRect: (CGRect)rect {
+- (void)drawRect:(CGRect)rect {
     draw = YES;
     %orig;
     draw = NO;
@@ -218,9 +218,9 @@ static const NSString *colKey = @"columns";
 static const NSString *rowKey = @"rows";
 
 HaveCallback() {
-    GetPrefs()
-    GetInt2(col, IS_IPAD ? 12 : 8)
-    GetInt2(row, IS_IPAD ? 3 : 5)
+    GetPrefs();
+    GetInt2(col, IS_IPAD ? 12 : 8);
+    GetInt2(row, IS_IPAD ? 3 : 5);
 }
 
 %ctor {
