@@ -1,7 +1,7 @@
-#define UIFUNCTIONS_NOT_C
 #import "../EmojiLibrary/Header.h"
 #import "PSEmojiLayout.h"
 #import <UIKit/UIScreen+Private.h>
+#import <UIKit/UIKeyboardImpl.h>
 #import <UIKit/UIPeripheralHost.h>
 
 @implementation PSEmojiLayout

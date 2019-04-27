@@ -3,10 +3,10 @@
 #import "../EmojiLibrary/PSEmojiUtilities.h"
 #import "../PSPrefs.x"
 #import "PSEmojiLayout.h"
+#import <UIKit/UIKeyboardImpl.h>
 #import <CoreText/CoreText.h>
 
-NSInteger row;
-NSInteger col;
+NSInteger row, col;
 
 %hook UIKeyboardEmojiGraphics
 
@@ -224,7 +224,7 @@ HaveCallback() {
 }
 
 %ctor {
-    if (isTarget(TargetTypeGUINoExtension)) {
+    if (isTarget(TargetTypeApps)) {
         HaveObserver();
         callback();
 #if !TARGET_OS_SIMULATOR

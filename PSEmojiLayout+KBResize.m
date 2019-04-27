@@ -1,4 +1,3 @@
-#define UIFUNCTIONS_NOT_C
 #import "PSEmojiLayout.h"
 
 @implementation PSEmojiLayout (KBResize)
