@@ -5,6 +5,7 @@ ifeq ($(SIMULATOR),1)
 	ARCHS = x86_64 i386
 else
 	TARGET = iphone:clang:latest:5.0
+	ARCHS = armv7 arm64
 endif
 
 include $(THEOS)/makefiles/common.mk
@@ -22,6 +23,7 @@ setup:: clean all
 	@cp -v $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib /opt/simject
 	@cp -v $(PWD)/$(TWEAK_NAME).plist /opt/simject
 	$(ECHO_NOTHING)find $(PWD)/EmojiLayout -name .DS_Store | xargs rm -rf$(ECHO_END)
+	@sudo mkdir -p $(PL_SIMULATOR_PLISTS_PATH)
 	@sudo cp -vR $(PWD)/EmojiLayout $(PL_SIMULATOR_PLISTS_PATH)/
 else
 internal-stage::

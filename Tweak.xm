@@ -5,6 +5,7 @@
 #import "PSEmojiLayout.h"
 #import <UIKit/UIKeyboardImpl.h>
 #import <CoreText/CoreText.h>
+#import <substrate.h>
 
 NSInteger row, col;
 
@@ -227,9 +228,7 @@ HaveCallback() {
     if (isTarget(TargetTypeApps)) {
         HaveObserver();
         callback();
-#if !TARGET_OS_SIMULATOR
-        dlopen("/usr/lib/libEmojiLibrary.dylib", RTLD_LAZY);
-#endif
+        dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_LAZY);
         if (isiOS6Up) {
             %init(iOS6Up);
         }
