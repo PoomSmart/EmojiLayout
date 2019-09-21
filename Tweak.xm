@@ -38,12 +38,12 @@ BOOL pageZero = NO;
     if (!pageZero && emoji.count && ((portrait = [PSEmojiLayout isPortrait]) || IS_IPAD)) {
         NSInteger Row = [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
         NSInteger Col = [NSClassFromString(@"UIKeyboardEmojiGraphics") colCount:portrait];
-        NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray array];
-        for (NSInteger i = 0; i < Row; i++) {
-            for (NSInteger count = 0; count < Col; count++) {
-                NSInteger emojiIndex = (count * Row) + i;
-                [reorderedEmoji addObject:emojiIndex < emoji.count ? [emoji objectAtIndex:emojiIndex] : [SoftPSEmojiUtilities emojiWithString:@""]];
-            }
+        NSInteger Page = Row * Col;
+        NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray arrayWithCapacity:Page];
+        UIKeyboardEmoji *emptyEmoji = [SoftPSEmojiUtilities emojiWithString:@""];
+        for (NSInteger i = 0; i < Page; ++i) {
+            NSInteger emojiIndex = ((i % Col) * Row) + (i / Col);
+            [reorderedEmoji addObject:emojiIndex < emoji.count ? [emoji objectAtIndex:emojiIndex] : emptyEmoji];
         }
         if (reorderedEmoji.count) {
             %orig(reorderedEmoji);
@@ -145,7 +145,7 @@ BOOL pageZero = NO;
     }
     [recents insertObject:emoji atIndex:idx];
     emojiDefaultsController.recentsKey = recents;
-    ((UIKeyboardEmojiCategory *)[%c(UIKeyboardEmojiCategory) categoryForType : 0]).emoji = recents;
+    ((UIKeyboardEmojiCategory *)[%c(UIKeyboardEmojiCategory) categoryForType:0]).emoji = recents;
 }
 
 %end
