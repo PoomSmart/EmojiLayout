@@ -1,6 +1,6 @@
 Package: com.ps.emojilayout
 Name: EmojiLayout
-Depends: preferenceloader, firmware (>= 5.1), firmware (<< 8.3)
+Depends: preferenceloader, firmware (>= 6.0), firmware (<< 8.3)
 Version: 1.0.0
 Architecture: iphoneos-arm
 Description: Layout the emoji keyboard.

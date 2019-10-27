@@ -1,4 +1,3 @@
-#define CHECK_TARGET
 #import "../PS.h"
 #import "../EmojiLibrary/PSEmojiUtilities.h"
 #import "../PSPrefs.x"
@@ -225,24 +224,22 @@ HaveCallback() {
 }
 
 %ctor {
-    if (isTarget(TargetTypeApps)) {
-        HaveObserver();
-        callback();
-        dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_LAZY);
-        if (isiOS6Up) {
-            %init(iOS6Up);
-        }
-        if (isiOS7Up) {
-            %init(iOS7Up);
-        }
-#if !__LP64__
-        else {
-            %init(iOS56);
-            if (isiOS6) {
-                %init(iOS6);
-            }
-        }
-#endif
-        %init;
+    HaveObserver();
+    callback();
+    dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_LAZY);
+    if (isiOS6Up) {
+        %init(iOS6Up);
     }
+    if (isiOS7Up) {
+        %init(iOS7Up);
+    }
+#if !__LP64__
+    else {
+        %init(iOS56);
+        if (isiOS6) {
+            %init(iOS6);
+        }
+    }
+#endif
+    %init;
 }

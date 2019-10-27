@@ -7,16 +7,12 @@
 @implementation PSEmojiLayout
 
 + (BOOL)isPortrait {
- #if !__LP64__
-    if (!isiOS6Up)
-        return ![NSClassFromString(@"UIKeyboardLayoutEmoji") isLandscape];
- #endif
     NSInteger orientation = [UIKeyboardImpl.activeInstance interfaceOrientation];
     return orientation == 1 || orientation == 2;
 }
 
 + (UIKeyboardEmojiScrollView *)emojiScrollView {
-    return isiOS6Up ? (UIKeyboardEmojiScrollView *)[NSClassFromString(@"UIKeyboardEmojiInputController") activeInputView] : (UIKeyboardEmojiScrollView *)[[NSClassFromString(@"UIKeyboardLayoutEmoji") emojiLayout] valueForKey:@"_emojiView"];
+    return (UIKeyboardEmojiScrollView *)[NSClassFromString(@"UIKeyboardEmojiInputController") activeInputView];
 }
 
 + (NSInteger)rowCount:(BOOL)portrait {
