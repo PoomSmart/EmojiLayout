@@ -1,5 +1,5 @@
 #import "../EmojiLibrary/Header.h"
-#import "../PSPrefs.x"
+#import "../PSPrefs/PSPrefs.x"
 
 #define GetVal(TYPE, val, key, defaultVal) val = [PSSettings objectForKey:key] ? [[PSSettings objectForKey:key] TYPE ## Value] : defaultVal;
 #define GetInt(val, key, defaultVal) GetVal(int, val, key, defaultVal)
