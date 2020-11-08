@@ -3,6 +3,8 @@
 #import <UIKit/UIScreen+Private.h>
 #import <UIKit/UIKeyboardImpl.h>
 #import <UIKit/UIPeripheralHost.h>
+#import <theos/IOSMacros.h>
+#import <version.h>
 
 @implementation PSEmojiLayout
 
@@ -36,7 +38,7 @@
 }
 
 + (CGFloat)offset:(BOOL)portrait {
-    return isiOS7Up ? [NSClassFromString(@"UIKeyboardEmojiGraphics") emojiPageControlYOffset:portrait] : DEFAULT_OFFSET;
+    return IS_IOS_OR_NEWER(iOS_7_0) ? [NSClassFromString(@"UIKeyboardEmojiGraphics") emojiPageControlYOffset:portrait] : DEFAULT_OFFSET;
 }
 
 + (CGFloat)dotHeight {
@@ -67,7 +69,7 @@
 }
 
 + (CGFloat)keyboardWidth:(BOOL)portrait {
-    if (isiOS8Up)
+    if (IS_IOS_OR_NEWER(iOS_8_0))
         return [(UIPeripheralHost *)[NSClassFromString(@"UIPeripheralHost") sharedInstance] transformedContainerView].bounds.size.width;
     CGRect screenRect = UIScreen.mainScreen.bounds;
     return portrait ? screenRect.size.width : screenRect.size.height;

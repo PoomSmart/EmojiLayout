@@ -1,10 +1,12 @@
 #import "PSEmojiLayout.h"
+#import <theos/IOSMacros.h>
+#import <version.h>
 
 @implementation PSEmojiLayout (KBResize)
 
 + (CGFloat)getHeight:(NSString *)name chocoL:(CGFloat)chocoL chocoP:(CGFloat)chocoP truffleL:(CGFloat)truffleL truffleP:(CGFloat)truffleP l:(CGFloat)l p:(CGFloat)p padL:(CGFloat)padL padP:(CGFloat)padP {
     CGFloat height = 0.0;
-    BOOL isLandscape = [name rangeOfString:@"Landscape"].location != NSNotFound || [name rangeOfString:@"Caymen"].location != NSNotFound || (!isiOS7Up && [name rangeOfString:@"3587139855"].location != NSNotFound);
+    BOOL isLandscape = [name rangeOfString:@"Landscape"].location != NSNotFound || [name rangeOfString:@"Caymen"].location != NSNotFound || (!IS_IOS_OR_NEWER(iOS_7_0) && [name rangeOfString:@"3587139855"].location != NSNotFound);
     if ([name rangeOfString:@"Choco"].location != NSNotFound) {
         // iPhone 6
         height = isLandscape ? chocoL : chocoP;

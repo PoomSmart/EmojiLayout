@@ -4,7 +4,9 @@
 #import "PSEmojiLayout.h"
 #import <UIKit/UIKeyboardImpl.h>
 #import <CoreText/CoreText.h>
+#import <theos/IOSMacros.h>
 #import <substrate.h>
+#import <version.h>
 
 NSInteger row, col;
 
@@ -87,7 +89,7 @@ BOOL pageZero = NO;
         emojiString = [NSString stringWithFormat:@"%@%@", emojiString, FE0F];
     UIKeyboardImpl *kbImpl = [UIKeyboardImpl sharedInstance];
     if ([kbImpl acceptInputString:emojiString]) {
-        if (isiOS7Up) {
+        if (IS_IOS_OR_NEWER(iOS_7_0)) {
             [kbImpl.taskQueue addTask:^{
                 [kbImpl addInputString:emojiString withFlags:0 executionContext:kbImpl.taskQueue.executionContext];
             }];
@@ -227,16 +229,16 @@ HaveCallback() {
     HaveObserver();
     callback();
     dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_LAZY);
-    if (isiOS6Up) {
+    if (IS_IOS_OR_NEWER(iOS_6_0)) {
         %init(iOS6Up);
     }
-    if (isiOS7Up) {
+    if (IS_IOS_OR_NEWER(iOS_7_0)) {
         %init(iOS7Up);
     }
 #if !__LP64__
     else {
         %init(iOS56);
-        if (isiOS6) {
+        if (IS_IOS_BETWEEN(iOS_6_0, iOS_6_1)) {
             %init(iOS6);
         }
     }
