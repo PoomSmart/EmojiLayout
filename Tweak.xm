@@ -228,7 +228,7 @@ HaveCallback() {
 %ctor {
     HaveObserver();
     callback();
-    dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_LAZY);
+    dlopen(realPath2(@"/usr/lib/libEmojiLibrary.dylib"), RTLD_NOW);
     if (IS_IOS_OR_NEWER(iOS_6_0)) {
         %init(iOS6Up);
     }
