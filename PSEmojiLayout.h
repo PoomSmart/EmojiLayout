@@ -1,14 +1,6 @@
 #import "../EmojiLibrary/Header.h"
 #import "../PSPrefs/PSPrefs.x"
 
-#define GetVal(TYPE, val, key, defaultVal) val = [PSSettings objectForKey:key] ? [[PSSettings objectForKey:key] TYPE ## Value] : defaultVal;
-#define GetInt(val, key, defaultVal) GetVal(int, val, key, defaultVal)
-#define GetInt2(val, defaultVal) GetInt(val, val ## Key, defaultVal)
-
-#define GetPrefs() NSDictionary *PSSettings = [NSDictionary dictionaryWithContentsOfFile:toPrefPath()];
-#define HaveCallback() static void callback()
-#define HaveObserver() CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)callback, (CFStringRef)toPostNotification(), NULL, CFNotificationSuspensionBehaviorCoalesce)
-
 #define DEFAULT_OFFSET 6.0
 #define MARGIN 8.5
 #define MARGIN_IPAD 10.0

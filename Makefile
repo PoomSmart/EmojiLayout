@@ -31,5 +31,4 @@ else
 internal-stage::
 	$(ECHO_NOTHING)mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences$(ECHO_END)
 	$(ECHO_NOTHING)cp -R EmojiLayout $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/EmojiLayout$(ECHO_END)
-	$(ECHO_NOTHING)find $(THEOS_STAGING_DIR) -name .DS_Store -delete$(ECHO_END)
 endif
