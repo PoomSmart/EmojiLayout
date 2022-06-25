@@ -1,6 +1,6 @@
 Package: com.ps.emojilayout
 Name: EmojiLayout
-Depends: preferenceloader, firmware (>= 5.1), firmware (<< 8.3)
+Depends: preferenceloader, firmware (>= 6.0), firmware (<< 8.3)
 Version: 1.0.0
 Architecture: iphoneos-arm
 Description: Layout the emoji keyboard.
@@ -8,3 +8,4 @@ Maintainer: PoomSmart
 Author: PoomSmart
 Section: Tweaks
 Depiction: https://poomsmart.github.io/repo/depictions/emojilayout.html
+Tag: compatible::ios6, compatible::ios7, compatible::ios8

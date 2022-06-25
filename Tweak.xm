@@ -5,6 +5,7 @@
 #import <UIKit/UIKeyboardImpl.h>
 #import <CoreText/CoreText.h>
 #import <theos/IOSMacros.h>
+#import <dlfcn.h>
 #import <substrate.h>
 #import <version.h>
 
@@ -37,8 +38,8 @@ BOOL pageZero = NO;
 - (void)setEmoji:(NSArray <UIKeyboardEmoji *> *)emoji {
     BOOL portrait = NO;
     if (!pageZero && emoji.count && ((portrait = [PSEmojiLayout isPortrait]) || IS_IPAD)) {
-        NSInteger Row = [NSClassFromString(@"UIKeyboardEmojiGraphics") rowCount:portrait];
-        NSInteger Col = [NSClassFromString(@"UIKeyboardEmojiGraphics") colCount:portrait];
+        NSInteger Row = [%c(UIKeyboardEmojiGraphics) rowCount:portrait];
+        NSInteger Col = [%c(UIKeyboardEmojiGraphics) colCount:portrait];
         NSInteger Page = Row * Col;
         NSMutableArray <UIKeyboardEmoji *> *reorderedEmoji = [NSMutableArray arrayWithCapacity:Page];
         UIKeyboardEmoji *emptyEmoji = [SoftPSEmojiUtilities emojiWithString:@""];
@@ -87,7 +88,7 @@ BOOL pageZero = NO;
         return;
     if ([emoji respondsToSelector:@selector(hasDingbat)] && [emoji hasDingbat])
         emojiString = [NSString stringWithFormat:@"%@%@", emojiString, FE0F];
-    UIKeyboardImpl *kbImpl = [UIKeyboardImpl sharedInstance];
+    __block __weak UIKeyboardImpl *kbImpl = [UIKeyboardImpl sharedInstance];
     if ([kbImpl acceptInputString:emojiString]) {
         if (IS_IOS_OR_NEWER(iOS_7_0)) {
             [kbImpl.taskQueue addTask:^{
@@ -101,7 +102,7 @@ BOOL pageZero = NO;
     if (usageHistory == nil) {
         id usageHistoryKey = emojiDefaultsController.usageHistoryKey;
         if (usageHistoryKey)
-            usageHistory = (NSMutableDictionary *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)usageHistoryKey, kCFPropertyListMutableContainersAndLeaves);
+            usageHistory = (__bridge NSMutableDictionary *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)usageHistoryKey, kCFPropertyListMutableContainersAndLeaves);
         else
             usageHistory = [[NSMutableDictionary alloc] initWithCapacity:10];
     }
@@ -109,7 +110,7 @@ BOOL pageZero = NO;
     if (recents == nil) {
         id recentsKey = emojiDefaultsController.recentsKey;
         if (recentsKey)
-            recents = (NSMutableArray *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)recentsKey, kCFPropertyListMutableContainersAndLeaves);
+            recents = (__bridge NSMutableArray *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFPropertyListRef)recentsKey, kCFPropertyListMutableContainersAndLeaves);
         else
             recents = [[NSMutableArray alloc] initWithCapacity:10];
     }

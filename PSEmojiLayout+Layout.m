@@ -3,6 +3,7 @@
 #import <UIKit/UIScreen+Private.h>
 #import <UIKit/UIKeyboardImpl.h>
 #import <UIKit/UIPeripheralHost.h>
+#import <UIKit/UIPageControl+Private.h>
 #import <theos/IOSMacros.h>
 #import <version.h>
 
@@ -70,7 +71,7 @@
 
 + (CGFloat)keyboardWidth:(BOOL)portrait {
     if (IS_IOS_OR_NEWER(iOS_8_0))
-        return [(UIPeripheralHost *)[NSClassFromString(@"UIPeripheralHost") sharedInstance] transformedContainerView].bounds.size.width;
+        return [[NSClassFromString(@"UIPeripheralHost") sharedInstance] transformedContainerView].bounds.size.width;
     CGRect screenRect = UIScreen.mainScreen.bounds;
     return portrait ? screenRect.size.width : screenRect.size.height;
 }
