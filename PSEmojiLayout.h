@@ -1,5 +1,5 @@
 #import "../EmojiLibrary/Header.h"
-#import "../PSPrefs/PSPrefs.x"
+#import "../../PSPrefs/PSPrefs.x"
 
 #define DEFAULT_OFFSET 6.0
 #define MARGIN 8.5
