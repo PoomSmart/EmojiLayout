@@ -1,4 +1,4 @@
-#import "../EmojiLibrary/Header.h"
+#import <EmojiLibrary/Header.h>
 #import "PSEmojiLayout.h"
 #import <UIKit/UIScreen+Private.h>
 #import <UIKit/UIKeyboardImpl.h>

@@ -1,4 +1,4 @@
-#import "../EmojiLibrary/Header.h"
+#import <EmojiLibrary/Header.h>
 #import "../../PSPrefs/PSPrefs.x"
 
 #define DEFAULT_OFFSET 6.0

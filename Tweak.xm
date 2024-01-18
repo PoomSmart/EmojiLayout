@@ -1,6 +1,6 @@
-#import "../PS.h"
-#import "../EmojiLibrary/PSEmojiUtilities.h"
-#import "../PSPrefs/PSPrefs.x"
+#import <PSHeader/PS.h>
+#import <EmojiLibrary/PSEmojiUtilities.h>
+#import "../../PSPrefs/PSPrefs.x"
 #import "PSEmojiLayout.h"
 #import <UIKit/UIKeyboardImpl.h>
 #import <CoreText/CoreText.h>

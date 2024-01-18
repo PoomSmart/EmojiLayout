@@ -18,7 +18,7 @@ $(LIBRARY_NAME)_EXTRA_FRAMEWORKS = CydiaSubstrate
 $(LIBRARY_NAME)_USE_SUBSTRATE = 1
 
 include $(THEOS_MAKE_PATH)/library.mk
-include ../preferenceloader-sim/locatesim.mk
+include ../../preferenceloader-sim/locatesim.mk
 
 ifeq ($(SIMULATOR),1)
 setup:: clean all
