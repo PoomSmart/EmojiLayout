@@ -126,7 +126,7 @@ BOOL pageZero = NO;
     emojiDefaultsController.usageHistoryKey = usageHistory;
     double scoreForEmoji = [self scoreForEmoji:emoji];
     NSUInteger recentsCount = recents.count;
-    NSUInteger maxCount = [%c(UIKeyboardEmojiGraphics) rowCount:YES] * [%c(UIKeyboardEmojiGraphics) colCount: YES];
+    NSUInteger maxCount = [%c(UIKeyboardEmojiGraphics) rowCount:YES] * [%c(UIKeyboardEmojiGraphics) colCount:YES];
     NSUInteger indexOfEmojiToBeRemoved = [recents indexOfObject:emoji];
     if (recentsCount && indexOfEmojiToBeRemoved != NSNotFound)
         [recents removeObjectAtIndex:indexOfEmojiToBeRemoved];
